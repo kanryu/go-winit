@@ -1,0 +1,562 @@
+// libwinit C ABI declarations for Hike.
+//
+// This file mirrors third_party/libwinit/winit.h. Opaque Rust/value-box
+// handles and callback pointers are represented as *byte, matching the Hike
+// native bindings convention used by the wgpu-static bridge.
+package libwinit
+
+// C enum and scalar mappings used by winit.h:
+//   - WinitEventLoopType: uint8
+//   - WinitControlFlow and event/user/cursor enums: uint32
+//   - size_t: uint64
+//   - unsigned long: uint32 on Windows
+//   - double: float64
+//   - opaque pointers and function pointers: *byte
+
+type EventLoopType uint8
+
+const (
+	EventLoopTypeWindows EventLoopType = iota
+	EventLoopTypeMacOS
+	EventLoopTypeX11
+	EventLoopTypeWayland
+	EventLoopTypeUnknown
+)
+
+type ControlFlow uint32
+
+const (
+	ControlFlowPoll ControlFlow = iota
+	ControlFlowWait
+	ControlFlowExit
+)
+
+type EventType uint32
+
+const (
+	EventTypeUnknown EventType = iota
+	EventTypeWindowEventResized
+	EventTypeWindowEventMoved
+	EventTypeWindowEventCloseRequested
+	EventTypeWindowEventDestroyed
+	EventTypeWindowEventDroppedFile
+	EventTypeWindowEventHoveredFile
+	EventTypeWindowEventHoveredFileCancelled
+	EventTypeWindowEventReceivedCharacter
+	EventTypeWindowEventFocused
+	EventTypeWindowEventKeyboardInput
+	EventTypeWindowEventCursorMoved
+	EventTypeWindowEventCursorEntered
+	EventTypeWindowEventCursorLeft
+	EventTypeWindowEventMouseWheel
+	EventTypeWindowEventMouseInput
+	EventTypeWindowEventTouchpadPressure
+	EventTypeWindowEventAxisMotion
+	EventTypeWindowEventTouch
+	EventTypeWindowEventScaleFactorChanged
+	EventTypeNewEvents
+	EventTypeMainEventsCleared
+	EventTypeLoopDestroyed
+	EventTypeSuspended
+	EventTypeResumed
+	EventTypeRedrawRequested
+	EventTypeRedrawEventsCleared
+	EventTypeModifiersChanged
+	EventTypeUserEvent
+	EventTypeWindowEventOccluded
+)
+
+type EventTouchPhase uint32
+
+const (
+	EventTouchPhaseUnknown EventTouchPhase = iota
+	EventTouchPhaseStarted
+	EventTouchPhaseMoved
+	EventTouchPhaseEnded
+	EventTouchPhaseCancelled
+)
+
+type EventMouseScrollDeltaType uint32
+
+const (
+	EventMouseScrollDeltaTypeUnknown EventMouseScrollDeltaType = iota
+	EventMouseScrollDeltaTypeLineDelta
+	EventMouseScrollDeltaTypePixelDelta
+)
+
+type EventInputElementState uint32
+
+const (
+	EventInputElementStateUnknown EventInputElementState = iota
+	EventInputElementStatePressed
+	EventInputElementStateReleased
+)
+
+type EventMouseButtonType uint32
+
+const (
+	EventMouseButtonTypeUnknown EventMouseButtonType = iota
+	EventMouseButtonTypeLeft
+	EventMouseButtonTypeRight
+	EventMouseButtonTypeMiddle
+	EventMouseButtonTypeOther
+)
+
+type UserEvent uint32
+
+const (
+	UserEventWakeUp UserEvent = iota
+	UserEventExit
+)
+
+type CursorIcon uint32
+
+const (
+	CursorIconDefault CursorIcon = iota
+	CursorIconCrosshair
+	CursorIconHand
+	CursorIconArrow
+	CursorIconMove
+	CursorIconText
+	CursorIconWait
+	CursorIconHelp
+	CursorIconProgress
+	CursorIconNotAllowed
+	CursorIconContextMenu
+	CursorIconCell
+	CursorIconVerticalText
+	CursorIconAlias
+	CursorIconCopy
+	CursorIconNoDrop
+	CursorIconGrab
+	CursorIconGrabbing
+	CursorIconAllScroll
+	CursorIconZoomIn
+	CursorIconZoomOut
+	CursorIconEResize
+	CursorIconNResize
+	CursorIconNeResize
+	CursorIconNwResize
+	CursorIconSResize
+	CursorIconSeResize
+	CursorIconSwResize
+	CursorIconWResize
+	CursorIconEwResize
+	CursorIconNsResize
+	CursorIconNeswResize
+	CursorIconNwseResize
+	CursorIconColResize
+	CursorIconRowResize
+)
+
+// Public value layouts from winit.h. Pointer-bearing members remain opaque;
+// callers normally pass these records through *byte to native entry points.
+type U128 struct {
+	High uint64
+	Low  uint64
+}
+
+type TouchEvent struct {
+	DeviceID int64
+	Phase    EventTouchPhase
+	X        float64
+	Y        float64
+	ID       uint64
+}
+
+type MouseScrollDelta struct {
+	DeltaType EventMouseScrollDeltaType
+	X         float64
+	Y         float64
+}
+
+type MouseWheelEvent struct {
+	DeviceID int64
+	Phase    EventTouchPhase
+	Delta    MouseScrollDelta
+}
+
+type EventMouseButton struct {
+	ButtonType EventMouseButtonType
+	ButtonCode uint16
+}
+
+type MouseInputEvent struct {
+	DeviceID int64
+	State    EventInputElementState
+	Button   EventMouseButton
+}
+
+type CursorMovedEvent struct {
+	DeviceID int64
+	X        float64
+	Y        float64
+}
+
+type EventKeyboardInput struct {
+	DeviceID         int64
+	State            EventInputElementState
+	HasPhysicalKeycode bool
+	PhysicalKeycode uint32
+	IsSynthetic      bool
+}
+
+type EventReceivedCharacter struct {
+	Length uint64
+	Byte1  uint8
+	Byte2  uint8
+	Byte3  uint8
+	Byte4  uint8
+}
+
+type WindowResizedEvent struct {
+	Width  uint32
+	Height uint32
+}
+
+type WindowScaleFactorChangedEvent struct {
+	ScaleFactor float64
+	Width       uint32
+	Height      uint32
+}
+
+type WindowMovedEvent struct {
+	X int32
+	Y int32
+}
+
+type WindowFocusedEvent struct {
+	IsFocused bool
+}
+
+type WindowOccludedEvent struct {
+	IsOccluded bool
+}
+
+type EventModifiersState struct {
+	Shift bool
+	Ctrl  bool
+	Alt   bool
+	Logo  bool
+}
+
+type EventUserEvent struct {
+	Event UserEvent
+}
+
+type Event struct {
+	WindowID       U128
+	EventType      EventType
+	Touch          TouchEvent
+	MouseWheel     MouseWheelEvent
+	MouseInput     MouseInputEvent
+	CursorMoved    CursorMovedEvent
+	KeyboardInput  EventKeyboardInput
+	ReceivedCharacter EventReceivedCharacter
+	WindowResized  WindowResizedEvent
+	ScaleFactor    WindowScaleFactorChangedEvent
+	WindowMoved    WindowMovedEvent
+	WindowFocused  WindowFocusedEvent
+	WindowOccluded WindowOccludedEvent
+	Modifiers      EventModifiersState
+	UserEvent      EventUserEvent
+}
+
+type SizeU32 struct {
+	Width  uint32
+	Height uint32
+}
+
+type PointBoxI32 struct {
+	X int32
+	Y int32
+}
+
+// ValueBox output records used by the get-size, get-position and get-id APIs.
+// The tag is zero for the inline value variant; Value is the native pointer
+// held by the C union.
+type ValueBoxSizeBoxU32 struct {
+	Tag   uint8
+	Value uintptr
+}
+
+type ValueBoxPointBoxI32 struct {
+	Tag   uint8
+	Value uintptr
+}
+
+type U128Box struct {
+	Tag   uint8
+	Value uintptr
+}
+
+// Raw handles, value-boxes, StringBox, EventLoop, Window and WindowAttributes
+// are opaque C records. Keep their declarations as byte pointers so Hike does
+// not reinterpret Rust-owned memory.
+extern func boxer_string_from_byte_string(data *byte, length uint64) *byte
+extern func boxer_string_drop(stringBox *byte)
+
+extern func winit_test() bool
+extern func winit_init_logger()
+extern func winit_println(message *byte)
+extern func winit_print(message *byte)
+
+extern func winit_event_loop_new() *byte
+extern func winit_event_loop_drop(ptr *byte)
+extern func winit_event_loop_get_type(eventLoop *byte) uint8
+extern func winit_event_loop_run_data(eventLoop *byte, data *byte, callback *byte)
+extern func winit_event_loop_create_proxy(eventLoop *byte) *byte
+extern func winit_event_loop_drop_proxy(eventLoopProxy *byte)
+extern func winit_event_loop_exit(eventLoopProxy *byte) bool
+extern func winit_event_loop_wake(eventLoopProxy *byte) bool
+extern func winit_event_loop_get_primary_monitor(eventLoop *byte) *byte
+extern func winit_event_loop_run_return(eventLoop *byte, callback *byte)
+extern func winit_event_loop_run_return_data(eventLoop *byte, data *byte, callback *byte)
+extern func winit_event_drop(ptr *byte)
+extern func winit_waker_wake(waker *byte, event uint32) bool
+extern func winit_event_loop_waker_create(eventLoop *byte) *byte
+extern func winit_event_loop_waker_function() *byte
+extern func winit_event_loop_waker_drop(eventLoopWaker *byte)
+
+extern func winit_polling_event_loop_new() *byte
+extern func winit_polling_event_loop_wake(eventLoop *byte, event uint32) bool
+extern func winit_polling_event_loop_exit(eventLoop *byte) bool
+extern func winit_polling_event_loop_create_window(eventLoop *byte, windowAttributes *byte) *byte
+extern func winit_polling_event_loop_new_with_semaphore_and_main_events_signaller(semaphoreCallback *byte, semaphoreIndex uint64, semaphoreThunk *byte, mainEventsCallback *byte, mainEventsThunk *byte) *byte
+extern func winit_polling_event_loop_add_resize_listener(eventLoop *byte, windowID *byte, callback *byte, thunk *byte)
+extern func winit_polling_event_loop_add_main_events_signaller(eventLoop *byte, callback *byte, thunk *byte)
+extern func winit_polling_event_loop_count_resize_listeners(eventLoop *byte) uint64
+extern func winit_polling_event_loop_add_redraw_listener(eventLoop *byte, windowID *byte, callback *byte, thunk *byte)
+extern func winit_polling_event_loop_count_redraw_listeners(eventLoop *byte) uint64
+extern func winit_polling_event_loop_set_android_app(eventLoop *byte, androidApp *byte)
+extern func winit_polling_event_loop_poll(eventLoop *byte) *byte
+extern func winit_polling_event_loop_run(eventLoop *byte)
+extern func winit_polling_event_loop_get_type(eventLoop *byte) uint8
+extern func winit_polling_event_loop_drop(eventLoop *byte)
+
+extern func winit_window_ref_raw_window_handle(eventLoop *byte, windowRef *byte) *byte
+extern func winit_window_ref_raw_display_handle(eventLoop *byte, windowRef *byte) *byte
+extern func winit_window_ref_request_redraw(eventLoop *byte, windowRef *byte)
+extern func winit_window_ref_get_scale_factor(windowRef *byte) float64
+extern func winit_window_ref_get_inner_size(windowRef *byte, innerSize *byte)
+extern func winit_window_ref_set_inner_size(eventLoop *byte, windowRef *byte, width uint32, height uint32)
+extern func winit_window_ref_get_position(windowRef *byte, position *byte)
+extern func winit_window_ref_set_position(eventLoop *byte, windowRef *byte, x int32, y int32)
+extern func winit_window_ref_get_id(windowRef *byte, id *byte)
+extern func winit_window_ref_get_raw_id(windowRef *byte) *byte
+extern func winit_window_ref_set_title(eventLoop *byte, windowRef *byte, title *byte)
+extern func winit_window_ref_set_cursor_icon(eventLoop *byte, windowRef *byte, cursorIcon uint32)
+extern func winit_window_ref_set_maximized(eventLoop *byte, windowRef *byte, maximized bool)
+extern func winit_window_ref_focus_window(eventLoop *byte, windowRef *byte)
+extern func winit_window_ref_get_hwnd(eventLoop *byte, windowRef *byte) *byte
+extern func winit_window_ref_get_xlib_display(eventLoop *byte, windowRef *byte) *byte
+extern func winit_window_ref_get_xlib_window(eventLoop *byte, windowRef *byte) uint32
+extern func winit_window_ref_get_wayland_surface(eventLoop *byte, windowRef *byte) *byte
+extern func winit_window_ref_get_wayland_display(eventLoop *byte, windowRef *byte) *byte
+extern func winit_window_ref_current_monitor(eventLoop *byte, windowRef *byte) *byte
+extern func winit_window_ref_primary_monitor(eventLoop *byte, windowRef *byte) *byte
+extern func winit_window_ref_destroy(eventLoop *byte, windowRef *byte)
+
+extern func winit_monitor_get_hidpi_factor(monitorHandle *byte) float64
+extern func winit_monitor_get_size(monitorHandle *byte, size *byte)
+extern func winit_monitor_drop(ptr *byte)
+
+extern func winit_create_window(eventLoop *byte, windowAttributes *byte) *byte
+extern func winit_window_raw_window_handle(window *byte) *byte
+extern func winit_window_raw_display_handle(window *byte) *byte
+extern func winit_window_request_redraw(window *byte)
+extern func winit_window_get_scale_factor(window *byte) float64
+extern func winit_window_get_inner_size(window *byte, size *byte)
+extern func winit_window_set_inner_size(window *byte, width uint32, height uint32)
+extern func winit_window_get_position(window *byte, position *byte)
+extern func winit_window_set_position(window *byte, x int32, y int32)
+extern func winit_window_set_ime_allowed(window *byte, allowed bool)
+extern func winit_window_get_id(window *byte, windowID *byte)
+extern func winit_window_set_title(window *byte, windowTitle *byte)
+extern func winit_window_set_cursor_icon(window *byte, cursorIcon uint32)
+extern func winit_window_set_maximized(window *byte, maximized bool)
+extern func winit_window_is_maximized(window *byte) bool
+extern func winit_window_focus_window(window *byte)
+extern func winit_window_get_hwnd(windowPtr *byte) *byte
+extern func winit_window_get_xlib_display(window *byte) *byte
+extern func winit_window_get_xlib_window(window *byte) uint32
+extern func winit_window_current_monitor(window *byte) *byte
+extern func winit_window_primary_monitor(window *byte) *byte
+extern func winit_window_drop(ptr *byte)
+
+extern func winit_window_attributes_new() *byte
+extern func winit_window_attributes_drop(windowAttributes *byte)
+extern func winit_window_attributes_with_title(windowAttributes *byte, windowTitle *byte)
+extern func winit_window_attributes_with_decorations(windowAttributes *byte, withDecorations bool)
+extern func winit_window_attributes_with_transparency(windowAttributes *byte, withTransparency bool)
+extern func winit_window_attributes_with_resizable(windowAttributes *byte, withResizable bool)
+extern func winit_window_attributes_with_dimensions(windowAttributes *byte, width float64, height float64)
+extern func winit_window_attributes_with_maximized(windowAttributes *byte, withMaximized bool)
+extern func winit_window_attributes_with_visibility(windowAttributes *byte, withVisibility bool)
+extern func winit_window_attributes_with_always_on_top(windowAttributes *byte, withAlwaysOnTop bool)
+extern func winit_window_attributes_with_full_size(windowAttributes *byte, withFullSize bool)
+
+// Native callback implementations. These are deliberately small, safe
+// defaults: callers can pass their thunk through the data argument and use the
+// generated callback pointers when registering with libwinit.
+cfunc c_EventLoopRunDataCallback(data *byte, event *Event) uint32 {
+	if event.EventType == EventTypeWindowEventCloseRequested {
+		if data != nil {
+			winit_window_drop(data)
+		}
+		return uint32(2) // WinitControlFlow_Exit
+	}
+	return uint32(1) // WinitControlFlow_Wait
+}
+
+cfunc EventLoopRunDataCallback(data *byte, event *Event) uint32 = c_EventLoopRunDataCallback
+
+cfunc c_EventLoopRunReturnCallback(event *Event) uint32 {
+	if event.EventType == EventTypeWindowEventCloseRequested {
+		return uint32(2) // WinitControlFlow_Exit
+	}
+	return uint32(1) // WinitControlFlow_Wait
+}
+
+cfunc EventLoopRunReturnCallback(event *Event) uint32 = c_EventLoopRunReturnCallback
+
+cfunc c_PollingSemaphoreCallback(index uint64, thunk *byte) {
+}
+
+cfunc PollingSemaphoreCallback(index uint64, thunk *byte) = c_PollingSemaphoreCallback
+
+cfunc c_PollingMainEventsCallback(thunk *byte) {
+}
+
+cfunc PollingMainEventsCallback(thunk *byte) = c_PollingMainEventsCallback
+
+cfunc c_PollingResizeCallback(thunk *byte, width uint32, height uint32) {
+}
+
+cfunc PollingResizeCallback(thunk *byte, width uint32, height uint32) = c_PollingResizeCallback
+
+cfunc c_PollingRedrawCallback(thunk *byte) {
+}
+
+cfunc PollingRedrawCallback(thunk *byte) = c_PollingRedrawCallback
+
+// Keeps the generated Go package's aggregate ABI path alive. HikeC emits a
+// runtime.KeepAlive call for this record argument, which is also required by
+// the pointer-bearing event callback records above.
+cfunc KeepAliveEvent(event Event) {
+}
+
+// Callback pointer accessors follow the same pattern as the wgpu-static Hike
+// bridge. The returned uintptr is the address of a native ABI-compatible
+// trampoline and can be supplied to the callback *byte parameters above.
+extern func EventLoopRunDataCallbackPtr() uintptr = EventLoopRunDataCallback
+extern func EventLoopRunReturnCallbackPtr() uintptr = EventLoopRunReturnCallback
+extern func PollingSemaphoreCallbackPtr() uintptr = PollingSemaphoreCallback
+extern func PollingMainEventsCallbackPtr() uintptr = PollingMainEventsCallback
+extern func PollingResizeCallbackPtr() uintptr = PollingResizeCallback
+extern func PollingRedrawCallbackPtr() uintptr = PollingRedrawCallback
+
+// Go-facing aliases. These preserve the exact native symbol names above while
+// exposing idiomatic Hike names for generated callers.
+cfunc BoxerStringFromByteString(data *byte, length uint64) *byte = boxer_string_from_byte_string
+cfunc BoxerStringDrop(stringBox *byte) = boxer_string_drop
+
+cfunc Test() bool = winit_test
+cfunc InitLogger() = winit_init_logger
+cfunc Println(message *byte) = winit_println
+cfunc Print(message *byte) = winit_print
+
+cfunc EventLoopNew() *byte = winit_event_loop_new
+cfunc EventLoopDrop(ptr *byte) = winit_event_loop_drop
+cfunc EventLoopGetType(eventLoop *byte) int = winit_event_loop_get_type
+cfunc EventLoopRunData(eventLoop *byte, data *byte, callback *byte) = winit_event_loop_run_data
+cfunc EventLoopCreateProxy(eventLoop *byte) *byte = winit_event_loop_create_proxy
+cfunc EventLoopDropProxy(eventLoopProxy *byte) = winit_event_loop_drop_proxy
+cfunc EventLoopExit(eventLoopProxy *byte) bool = winit_event_loop_exit
+cfunc EventLoopWake(eventLoopProxy *byte) bool = winit_event_loop_wake
+cfunc EventLoopGetPrimaryMonitor(eventLoop *byte) *byte = winit_event_loop_get_primary_monitor
+cfunc EventLoopRunReturn(eventLoop *byte, callback *byte) = winit_event_loop_run_return
+cfunc EventLoopRunReturnData(eventLoop *byte, data *byte, callback *byte) = winit_event_loop_run_return_data
+cfunc EventDrop(ptr *byte) = winit_event_drop
+cfunc WakerWake(waker *byte, event int) bool = winit_waker_wake
+cfunc EventLoopWakerCreate(eventLoop *byte) *byte = winit_event_loop_waker_create
+cfunc EventLoopWakerFunction() *byte = winit_event_loop_waker_function
+cfunc EventLoopWakerDrop(eventLoopWaker *byte) = winit_event_loop_waker_drop
+
+cfunc PollingEventLoopNew() *byte = winit_polling_event_loop_new
+cfunc PollingEventLoopWake(eventLoop *byte, event int) bool = winit_polling_event_loop_wake
+cfunc PollingEventLoopExit(eventLoop *byte) bool = winit_polling_event_loop_exit
+cfunc PollingEventLoopCreateWindow(eventLoop *byte, windowAttributes *byte) *byte = winit_polling_event_loop_create_window
+cfunc PollingEventLoopNewWithSemaphoreAndMainEventsSignaller(semaphoreCallback *byte, semaphoreIndex uint64, semaphoreThunk *byte, mainEventsCallback *byte, mainEventsThunk *byte) *byte = winit_polling_event_loop_new_with_semaphore_and_main_events_signaller
+cfunc PollingEventLoopAddResizeListener(eventLoop *byte, windowID *byte, callback *byte, thunk *byte) = winit_polling_event_loop_add_resize_listener
+cfunc PollingEventLoopAddMainEventsSignaller(eventLoop *byte, callback *byte, thunk *byte) = winit_polling_event_loop_add_main_events_signaller
+cfunc PollingEventLoopCountResizeListeners(eventLoop *byte) uint64 = winit_polling_event_loop_count_resize_listeners
+cfunc PollingEventLoopAddRedrawListener(eventLoop *byte, windowID *byte, callback *byte, thunk *byte) = winit_polling_event_loop_add_redraw_listener
+cfunc PollingEventLoopCountRedrawListeners(eventLoop *byte) uint64 = winit_polling_event_loop_count_redraw_listeners
+cfunc PollingEventLoopSetAndroidApp(eventLoop *byte, androidApp *byte) = winit_polling_event_loop_set_android_app
+cfunc PollingEventLoopPoll(eventLoop *byte) *byte = winit_polling_event_loop_poll
+cfunc PollingEventLoopRun(eventLoop *byte) = winit_polling_event_loop_run
+cfunc PollingEventLoopGetType(eventLoop *byte) int = winit_polling_event_loop_get_type
+cfunc PollingEventLoopDrop(eventLoop *byte) = winit_polling_event_loop_drop
+
+cfunc WindowRefRawWindowHandle(eventLoop *byte, windowRef *byte) *byte = winit_window_ref_raw_window_handle
+cfunc WindowRefRawDisplayHandle(eventLoop *byte, windowRef *byte) *byte = winit_window_ref_raw_display_handle
+cfunc WindowRefRequestRedraw(eventLoop *byte, windowRef *byte) = winit_window_ref_request_redraw
+cfunc WindowRefGetScaleFactor(windowRef *byte) float64 = winit_window_ref_get_scale_factor
+cfunc WindowRefGetInnerSize(windowRef *byte, innerSize *byte) = winit_window_ref_get_inner_size
+cfunc WindowRefSetInnerSize(eventLoop *byte, windowRef *byte, width uint32, height uint32) = winit_window_ref_set_inner_size
+cfunc WindowRefGetPosition(windowRef *byte, position *byte) = winit_window_ref_get_position
+cfunc WindowRefSetPosition(eventLoop *byte, windowRef *byte, x int32, y int32) = winit_window_ref_set_position
+cfunc WindowRefGetID(windowRef *byte, id *byte) = winit_window_ref_get_id
+cfunc WindowRefGetRawID(windowRef *byte) *byte = winit_window_ref_get_raw_id
+cfunc WindowRefSetTitle(eventLoop *byte, windowRef *byte, title *byte) = winit_window_ref_set_title
+cfunc WindowRefSetCursorIcon(eventLoop *byte, windowRef *byte, cursorIcon int) = winit_window_ref_set_cursor_icon
+cfunc WindowRefSetMaximized(eventLoop *byte, windowRef *byte, maximized bool) = winit_window_ref_set_maximized
+cfunc WindowRefFocusWindow(eventLoop *byte, windowRef *byte) = winit_window_ref_focus_window
+cfunc WindowRefGetHWND(eventLoop *byte, windowRef *byte) *byte = winit_window_ref_get_hwnd
+cfunc WindowRefGetXlibDisplay(eventLoop *byte, windowRef *byte) *byte = winit_window_ref_get_xlib_display
+cfunc WindowRefGetXlibWindow(eventLoop *byte, windowRef *byte) uint32 = winit_window_ref_get_xlib_window
+cfunc WindowRefGetWaylandSurface(eventLoop *byte, windowRef *byte) *byte = winit_window_ref_get_wayland_surface
+cfunc WindowRefGetWaylandDisplay(eventLoop *byte, windowRef *byte) *byte = winit_window_ref_get_wayland_display
+cfunc WindowRefCurrentMonitor(eventLoop *byte, windowRef *byte) *byte = winit_window_ref_current_monitor
+cfunc WindowRefPrimaryMonitor(eventLoop *byte, windowRef *byte) *byte = winit_window_ref_primary_monitor
+cfunc WindowRefDestroy(eventLoop *byte, windowRef *byte) = winit_window_ref_destroy
+
+cfunc MonitorGetHIDPIFactor(monitorHandle *byte) float64 = winit_monitor_get_hidpi_factor
+cfunc MonitorGetSize(monitorHandle *byte, size *byte) = winit_monitor_get_size
+cfunc MonitorDrop(ptr *byte) = winit_monitor_drop
+
+cfunc CreateWindow(eventLoop *byte, windowAttributes *byte) *byte = winit_create_window
+cfunc WindowRawWindowHandle(window *byte) *byte = winit_window_raw_window_handle
+cfunc WindowRawDisplayHandle(window *byte) *byte = winit_window_raw_display_handle
+cfunc WindowRequestRedraw(window *byte) = winit_window_request_redraw
+cfunc WindowGetScaleFactor(window *byte) float64 = winit_window_get_scale_factor
+cfunc WindowGetInnerSize(window *byte, size *byte) = winit_window_get_inner_size
+cfunc WindowSetInnerSize(window *byte, width uint32, height uint32) = winit_window_set_inner_size
+cfunc WindowGetPosition(window *byte, position *byte) = winit_window_get_position
+cfunc WindowSetPosition(window *byte, x int32, y int32) = winit_window_set_position
+cfunc WindowSetIMEAllowed(window *byte, allowed bool) = winit_window_set_ime_allowed
+cfunc WindowGetID(window *byte, windowID *byte) = winit_window_get_id
+cfunc WindowSetTitle(window *byte, windowTitle *byte) = winit_window_set_title
+cfunc WindowSetCursorIcon(window *byte, cursorIcon int) = winit_window_set_cursor_icon
+cfunc WindowSetMaximized(window *byte, maximized bool) = winit_window_set_maximized
+cfunc WindowIsMaximized(window *byte) bool = winit_window_is_maximized
+cfunc WindowFocusWindow(window *byte) = winit_window_focus_window
+cfunc WindowGetHWND(windowPtr *byte) *byte = winit_window_get_hwnd
+cfunc WindowGetXlibDisplay(window *byte) *byte = winit_window_get_xlib_display
+cfunc WindowGetXlibWindow(window *byte) uint32 = winit_window_get_xlib_window
+cfunc WindowCurrentMonitor(window *byte) *byte = winit_window_current_monitor
+cfunc WindowPrimaryMonitor(window *byte) *byte = winit_window_primary_monitor
+cfunc WindowDrop(ptr *byte) = winit_window_drop
+
+cfunc WindowAttributesNew() *byte = winit_window_attributes_new
+cfunc WindowAttributesDrop(windowAttributes *byte) = winit_window_attributes_drop
+cfunc WindowAttributesWithTitle(windowAttributes *byte, windowTitle *byte) = winit_window_attributes_with_title
+cfunc WindowAttributesWithDecorations(windowAttributes *byte, withDecorations bool) = winit_window_attributes_with_decorations
+cfunc WindowAttributesWithTransparency(windowAttributes *byte, withTransparency bool) = winit_window_attributes_with_transparency
+cfunc WindowAttributesWithResizable(windowAttributes *byte, withResizable bool) = winit_window_attributes_with_resizable
+cfunc WindowAttributesWithDimensions(windowAttributes *byte, width float64, height float64) = winit_window_attributes_with_dimensions
+cfunc WindowAttributesWithMaximized(windowAttributes *byte, withMaximized bool) = winit_window_attributes_with_maximized
+cfunc WindowAttributesWithVisibility(windowAttributes *byte, withVisibility bool) = winit_window_attributes_with_visibility
+cfunc WindowAttributesWithAlwaysOnTop(windowAttributes *byte, withAlwaysOnTop bool) = winit_window_attributes_with_always_on_top
+cfunc WindowAttributesWithFullSize(windowAttributes *byte, withFullSize bool) = winit_window_attributes_with_full_size
