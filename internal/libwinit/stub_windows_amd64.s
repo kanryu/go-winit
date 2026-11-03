@@ -414,9 +414,8 @@ TEXT ·_hike_EventLoopGetPrimaryMonitor(SB), 0, $32-16
     RET
 
 // EventLoopRunReturn (passthrough: false)
-TEXT ·_hike_EventLoopRunReturn(SB), 0, $32-16
+TEXT ·_hike_EventLoopRunReturn(SB), 0, $32-8
     MOVQ eventLoop+0(FP), CX
-    MOVQ callback+8(FP), DX
     MOVQ SP, R11
     ANDQ $15, R11
     SUBQ R11, SP
@@ -442,6 +441,20 @@ TEXT ·_hike_EventLoopRunReturnData(SB), 0, $32-24
     MOVQ 40(SP), R11
     ADDQ $48, SP
     ADDQ R11, SP
+    RET
+
+// EventQueuePop (passthrough: false)
+TEXT ·_hike_EventQueuePop(SB), 0, $32-8
+    MOVQ SP, R11
+    ANDQ $15, R11
+    SUBQ R11, SP
+    SUBQ $48, SP
+    MOVQ R11, 40(SP)
+    CALL winit_event_queue_pop(SB)
+    MOVQ 40(SP), R11
+    ADDQ $48, SP
+    ADDQ R11, SP
+    MOVQ AX, ret+0(FP)
     RET
 
 // EventDrop (passthrough: false)
@@ -1812,6 +1825,12 @@ TEXT ·_hike_EventLoopRunReturnPtr(SB), NOSPLIT, $0-8
 // _hike_EventLoopRunReturnDataPtr: address of winit_event_loop_run_return_data
 TEXT ·_hike_EventLoopRunReturnDataPtr(SB), NOSPLIT, $0-8
     LEAQ winit_event_loop_run_return_data(SB), AX
+    MOVQ AX, ret+0(FP)
+    RET
+
+// _hike_EventQueuePopPtr: address of winit_event_queue_pop
+TEXT ·_hike_EventQueuePopPtr(SB), NOSPLIT, $0-8
+    LEAQ winit_event_queue_pop(SB), AX
     MOVQ AX, ret+0(FP)
     RET
 

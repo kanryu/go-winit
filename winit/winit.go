@@ -224,7 +224,7 @@ func (e *EventLoop) Run(callback Callback) {
 	if e == nil || e.ptr == nil {
 		return
 	}
-	runGoCallback(e, callback)
+	e.runGoEvents(callback, nil)
 }
 
 // RunTyped enters the native event loop and dispatches typed event values.
@@ -232,7 +232,7 @@ func (e *EventLoop) RunTyped(callback TypedCallback) {
 	if e == nil || e.ptr == nil {
 		return
 	}
-	runGoTypedCallback(e, callback)
+	e.runGoEvents(nil, callback)
 }
 
 // RunNative enters the event loop with a native callback pointer obtained from

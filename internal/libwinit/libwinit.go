@@ -91,6 +91,71 @@ type EventKeyboardInput struct {
 	HasPhysicalKeycode bool
 	PhysicalKeycode uint32
 	IsSynthetic bool
+	LogicalKeyLength uint64
+	LogicalKeyByte01 uint8
+	LogicalKeyByte02 uint8
+	LogicalKeyByte03 uint8
+	LogicalKeyByte04 uint8
+	LogicalKeyByte05 uint8
+	LogicalKeyByte06 uint8
+	LogicalKeyByte07 uint8
+	LogicalKeyByte08 uint8
+	LogicalKeyByte09 uint8
+	LogicalKeyByte10 uint8
+	LogicalKeyByte11 uint8
+	LogicalKeyByte12 uint8
+	LogicalKeyByte13 uint8
+	LogicalKeyByte14 uint8
+	LogicalKeyByte15 uint8
+	LogicalKeyByte16 uint8
+	LogicalKeyByte17 uint8
+	LogicalKeyByte18 uint8
+	LogicalKeyByte19 uint8
+	LogicalKeyByte20 uint8
+	LogicalKeyByte21 uint8
+	LogicalKeyByte22 uint8
+	LogicalKeyByte23 uint8
+	LogicalKeyByte24 uint8
+	LogicalKeyByte25 uint8
+	LogicalKeyByte26 uint8
+	LogicalKeyByte27 uint8
+	LogicalKeyByte28 uint8
+	LogicalKeyByte29 uint8
+	LogicalKeyByte30 uint8
+	LogicalKeyByte31 uint8
+	LogicalKeyByte32 uint8
+	LogicalKeyByte33 uint8
+	LogicalKeyByte34 uint8
+	LogicalKeyByte35 uint8
+	LogicalKeyByte36 uint8
+	LogicalKeyByte37 uint8
+	LogicalKeyByte38 uint8
+	LogicalKeyByte39 uint8
+	LogicalKeyByte40 uint8
+	LogicalKeyByte41 uint8
+	LogicalKeyByte42 uint8
+	LogicalKeyByte43 uint8
+	LogicalKeyByte44 uint8
+	LogicalKeyByte45 uint8
+	LogicalKeyByte46 uint8
+	LogicalKeyByte47 uint8
+	LogicalKeyByte48 uint8
+	LogicalKeyByte49 uint8
+	LogicalKeyByte50 uint8
+	LogicalKeyByte51 uint8
+	LogicalKeyByte52 uint8
+	LogicalKeyByte53 uint8
+	LogicalKeyByte54 uint8
+	LogicalKeyByte55 uint8
+	LogicalKeyByte56 uint8
+	LogicalKeyByte57 uint8
+	LogicalKeyByte58 uint8
+	LogicalKeyByte59 uint8
+	LogicalKeyByte60 uint8
+	LogicalKeyByte61 uint8
+	LogicalKeyByte62 uint8
+	LogicalKeyByte63 uint8
+	LogicalKeyByte64 uint8
 }
 
 type EventReceivedCharacter struct {
@@ -301,13 +366,19 @@ func EventLoopGetPrimaryMonitor(eventLoop *byte) *byte {
 }
 
 // EventLoopRunReturn: generated from the Hike cfunc signature
-func EventLoopRunReturn(eventLoop *byte, callback *byte) {
-	_, _, _ = syscall.SyscallN(_hike_EventLoopRunReturnPtr(), uintptr(unsafe.Pointer(eventLoop)), uintptr(unsafe.Pointer(callback)))
+func EventLoopRunReturn(eventLoop *byte) {
+	_, _, _ = syscall.SyscallN(_hike_EventLoopRunReturnPtr(), uintptr(unsafe.Pointer(eventLoop)))
 }
 
 // EventLoopRunReturnData: generated from the Hike cfunc signature
 func EventLoopRunReturnData(eventLoop *byte, data *byte, callback *byte) {
 	_, _, _ = syscall.SyscallN(_hike_EventLoopRunReturnDataPtr(), uintptr(unsafe.Pointer(eventLoop)), uintptr(unsafe.Pointer(data)), uintptr(unsafe.Pointer(callback)))
+}
+
+// EventQueuePop: generated from the Hike cfunc signature
+func EventQueuePop() *Event {
+	r1, _, _ := syscall.SyscallN(_hike_EventQueuePopPtr(), )
+	return (*Event)(unsafe.Pointer(r1))
 }
 
 // EventDrop: generated from the Hike cfunc signature
@@ -794,10 +865,12 @@ func _hike_EventLoopWake(eventLoopProxy *byte) bool
 func _hike_EventLoopWakePtr() uintptr
 func _hike_EventLoopGetPrimaryMonitor(eventLoop *byte) *byte
 func _hike_EventLoopGetPrimaryMonitorPtr() uintptr
-func _hike_EventLoopRunReturn(eventLoop *byte, callback *byte)
+func _hike_EventLoopRunReturn(eventLoop *byte)
 func _hike_EventLoopRunReturnPtr() uintptr
 func _hike_EventLoopRunReturnData(eventLoop *byte, data *byte, callback *byte)
 func _hike_EventLoopRunReturnDataPtr() uintptr
+func _hike_EventQueuePop() *Event
+func _hike_EventQueuePopPtr() uintptr
 func _hike_EventDrop(ptr *byte)
 func _hike_EventDropPtr() uintptr
 func _hike_WakerWake(waker *byte, event int) bool

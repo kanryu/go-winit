@@ -199,6 +199,71 @@ type EventKeyboardInput struct {
 	HasPhysicalKeycode bool
 	PhysicalKeycode uint32
 	IsSynthetic      bool
+ 	LogicalKeyLength uint64
+	LogicalKeyByte01 uint8
+	LogicalKeyByte02 uint8
+	LogicalKeyByte03 uint8
+	LogicalKeyByte04 uint8
+	LogicalKeyByte05 uint8
+	LogicalKeyByte06 uint8
+	LogicalKeyByte07 uint8
+	LogicalKeyByte08 uint8
+	LogicalKeyByte09 uint8
+	LogicalKeyByte10 uint8
+	LogicalKeyByte11 uint8
+	LogicalKeyByte12 uint8
+	LogicalKeyByte13 uint8
+	LogicalKeyByte14 uint8
+	LogicalKeyByte15 uint8
+	LogicalKeyByte16 uint8
+	LogicalKeyByte17 uint8
+	LogicalKeyByte18 uint8
+	LogicalKeyByte19 uint8
+	LogicalKeyByte20 uint8
+	LogicalKeyByte21 uint8
+	LogicalKeyByte22 uint8
+	LogicalKeyByte23 uint8
+	LogicalKeyByte24 uint8
+	LogicalKeyByte25 uint8
+	LogicalKeyByte26 uint8
+	LogicalKeyByte27 uint8
+	LogicalKeyByte28 uint8
+	LogicalKeyByte29 uint8
+	LogicalKeyByte30 uint8
+	LogicalKeyByte31 uint8
+	LogicalKeyByte32 uint8
+	LogicalKeyByte33 uint8
+	LogicalKeyByte34 uint8
+	LogicalKeyByte35 uint8
+	LogicalKeyByte36 uint8
+	LogicalKeyByte37 uint8
+	LogicalKeyByte38 uint8
+	LogicalKeyByte39 uint8
+	LogicalKeyByte40 uint8
+	LogicalKeyByte41 uint8
+	LogicalKeyByte42 uint8
+	LogicalKeyByte43 uint8
+	LogicalKeyByte44 uint8
+	LogicalKeyByte45 uint8
+	LogicalKeyByte46 uint8
+	LogicalKeyByte47 uint8
+	LogicalKeyByte48 uint8
+	LogicalKeyByte49 uint8
+	LogicalKeyByte50 uint8
+	LogicalKeyByte51 uint8
+	LogicalKeyByte52 uint8
+	LogicalKeyByte53 uint8
+	LogicalKeyByte54 uint8
+	LogicalKeyByte55 uint8
+	LogicalKeyByte56 uint8
+	LogicalKeyByte57 uint8
+	LogicalKeyByte58 uint8
+	LogicalKeyByte59 uint8
+	LogicalKeyByte60 uint8
+	LogicalKeyByte61 uint8
+	LogicalKeyByte62 uint8
+	LogicalKeyByte63 uint8
+	LogicalKeyByte64 uint8
 }
 
 type EventReceivedCharacter struct {
@@ -312,6 +377,7 @@ extern func winit_event_loop_wake(eventLoopProxy *byte) bool
 extern func winit_event_loop_get_primary_monitor(eventLoop *byte) *byte
 extern func winit_event_loop_run_return(eventLoop *byte, callback *byte)
 extern func winit_event_loop_run_return_data(eventLoop *byte, data *byte, callback *byte)
+extern func winit_event_queue_pop() *Event
 extern func winit_event_drop(ptr *byte)
 extern func winit_waker_wake(waker *byte, event uint32) bool
 extern func winit_event_loop_waker_create(eventLoop *byte) *byte
@@ -475,8 +541,9 @@ cfunc EventLoopDropProxy(eventLoopProxy *byte) = winit_event_loop_drop_proxy
 cfunc EventLoopExit(eventLoopProxy *byte) bool = winit_event_loop_exit
 cfunc EventLoopWake(eventLoopProxy *byte) bool = winit_event_loop_wake
 cfunc EventLoopGetPrimaryMonitor(eventLoop *byte) *byte = winit_event_loop_get_primary_monitor
-cfunc EventLoopRunReturn(eventLoop *byte, callback *byte) = winit_event_loop_run_return
+cfunc EventLoopRunReturn(eventLoop *byte) = winit_event_loop_run_return
 cfunc EventLoopRunReturnData(eventLoop *byte, data *byte, callback *byte) = winit_event_loop_run_return_data
+cfunc EventQueuePop() *Event = winit_event_queue_pop
 cfunc EventDrop(ptr *byte) = winit_event_drop
 cfunc WakerWake(waker *byte, event int) bool = winit_waker_wake
 cfunc EventLoopWakerCreate(eventLoop *byte) *byte = winit_event_loop_waker_create
