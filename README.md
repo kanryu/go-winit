@@ -1,6 +1,6 @@
 # go-winit
 
-`go-winit` is a Go binding for [libwinit](https://github.com/kanryu/libwinit) on Windows.
+`go-winit` provides Go bindings for [Libwinit](https://github.com/kanryu/libwinit), statically linking the Libwinit native library into Go applications. It enables cross-platform window creation, event handling, monitor management, native window handles, and GPU integration through Winit 0.30.
 
 In addition to exposing the libwinit C API, it provides Go callbacks, typed events, IME input, and user-event delivery from goroutines.
 

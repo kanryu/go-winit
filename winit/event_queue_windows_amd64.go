@@ -133,3 +133,23 @@ func (e *EventLoop) runGoEvents(callback Callback, typed TypedCallback) {
 		}
 	}
 }
+
+func (e *EventLoop) runGoEventBatches(callback func([]Event) ControlFlow) {
+	for e != nil && e.ptr != nil {
+		native.EventLoopRunReturn(e.ptr)
+		var events []Event
+		for {
+			raw := native.EventQueuePop()
+			if raw == nil {
+				break
+			}
+			event := rawEventFromNative(raw)
+			native.EventDrop((*byte)(unsafe.Pointer(raw)))
+			runtime.KeepAlive(raw)
+			events = append(events, event)
+		}
+		if len(events) != 0 && callback != nil && callback(events) == Exit {
+			return
+		}
+	}
+}

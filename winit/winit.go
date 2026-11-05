@@ -227,6 +227,16 @@ func (e *EventLoop) Run(callback Callback) {
 	e.runGoEvents(callback, nil)
 }
 
+// RunBatched enters the native event loop and delivers all events collected
+// during one native poll cycle as a single batch. This lets higher-level
+// window frameworks coalesce noisy events such as repeated resize notifications.
+func (e *EventLoop) RunBatched(callback func([]Event) ControlFlow) {
+	if e == nil || e.ptr == nil {
+		return
+	}
+	e.runGoEventBatches(callback)
+}
+
 // RunTyped enters the native event loop and dispatches typed event values.
 func (e *EventLoop) RunTyped(callback TypedCallback) {
 	if e == nil || e.ptr == nil {
