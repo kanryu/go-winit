@@ -1,4 +1,4 @@
-//go:build windows && amd64
+//go:build (windows || linux) && amd64
 
 package winit
 
@@ -103,14 +103,14 @@ func rawEventFromNative(raw *native.Event) Event {
 
 func (e *EventLoop) runGoEvents(callback Callback, typed TypedCallback) {
 	for e != nil && e.ptr != nil {
-		native.EventLoopRunReturn(e.ptr)
+		eventLoopRunReturnNative(e.ptr)
 		for {
-			raw := native.EventQueuePop()
+			raw := eventQueuePopNative()
 			if raw == nil {
 				break
 			}
 			event := rawEventFromNative(raw)
-			native.EventDrop((*byte)(unsafe.Pointer(raw)))
+			eventDropNative((*byte)(unsafe.Pointer(raw)))
 			runtime.KeepAlive(raw)
 
 			flow := Wait
@@ -139,12 +139,12 @@ func (e *EventLoop) runGoEventBatches(callback func([]Event) ControlFlow) {
 		native.EventLoopRunReturn(e.ptr)
 		var events []Event
 		for {
-			raw := native.EventQueuePop()
+			raw := eventQueuePopNative()
 			if raw == nil {
 				break
 			}
 			event := rawEventFromNative(raw)
-			native.EventDrop((*byte)(unsafe.Pointer(raw)))
+			eventDropNative((*byte)(unsafe.Pointer(raw)))
 			runtime.KeepAlive(raw)
 			events = append(events, event)
 		}

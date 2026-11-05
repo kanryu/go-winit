@@ -2,6 +2,9 @@
 
 `go-winit` provides Go bindings for [Libwinit](https://github.com/kanryu/libwinit), statically linking the Libwinit native library into Go applications. It enables cross-platform window creation, event handling, monitor management, native window handles, and GPU integration through Winit 0.30.
 
+The project supports both Windows and Linux (amd64). Linux builds use the
+native X11/Wayland backends supplied by Winit.
+
 In addition to exposing the libwinit C API, it provides Go callbacks, typed events, IME input, and user-event delivery from goroutines.
 
 ## About Winit
@@ -176,3 +179,30 @@ go run ./examples/event_types
 ```powershell
 go test ./...
 ```
+
+### WSLg
+
+When verifying the Linux example under WSLg, do not force X11 with
+`WINIT_UNIX_BACKEND=x11`; let the example use its default backend selection.
+On systems where the WSLg display bridge is unavailable, the process may keep
+running while no window is displayed. Check the WSLg/GUI integration before
+debugging the Go or Libwinit code.
+
+## Building the Libwinit static library
+
+The bundled Rust crate produces a Windows GNU static library in both profiles.
+Install the Rust target first if it is not already available:
+
+```powershell
+rustup target add x86_64-pc-windows-gnu
+```
+
+Build both profiles with:
+
+```powershell
+make libwinit-static
+```
+
+The libraries are written to `build/libwinit/x86_64-pc-windows-gnu/debug/libwinit.a`
+and `build/libwinit/x86_64-pc-windows-gnu/release/libwinit.a`. Individual profiles
+can be built with `make libwinit-debug` or `make libwinit-release`.

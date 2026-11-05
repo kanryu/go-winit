@@ -137,7 +137,15 @@ type EventLoop struct {
 }
 
 func NewEventLoop() *EventLoop {
-	e := &EventLoop{ptr: native.EventLoopNew()}
+	// Winit requires the event loop to be created and run on one OS thread.
+	// Keep the owning goroutine pinned for the lifetime of the event loop;
+	// otherwise Go's scheduler may migrate it between native calls on Linux.
+	runtime.LockOSThread()
+	e := &EventLoop{ptr: eventLoopNewNative()}
+	if e.ptr == nil {
+		runtime.UnlockOSThread()
+		return nil
+	}
 	runtime.SetFinalizer(e, (*EventLoop).Close)
 	return e
 }
@@ -146,9 +154,10 @@ func (e *EventLoop) Close() {
 	if e == nil || e.ptr == nil {
 		return
 	}
-	native.EventLoopDrop(e.ptr)
+	eventLoopDropNative(e.ptr)
 	e.ptr = nil
 	runtime.SetFinalizer(e, nil)
+	runtime.UnlockOSThread()
 }
 
 // EventLoopProxy wakes the event loop from another goroutine and delivers
@@ -268,7 +277,7 @@ func (e *EventLoop) RunWindow(window *Window) {
 type WindowAttributes struct{ ptr *byte }
 
 func NewWindowAttributes() *WindowAttributes {
-	a := &WindowAttributes{ptr: native.WindowAttributesNew()}
+	a := &WindowAttributes{ptr: windowAttributesNewNative()}
 	runtime.SetFinalizer(a, (*WindowAttributes).Close)
 	return a
 }
@@ -276,14 +285,14 @@ func (a *WindowAttributes) Close() {
 	if a == nil || a.ptr == nil {
 		return
 	}
-	native.WindowAttributesDrop(a.ptr)
+	windowAttributesDropNative(a.ptr)
 	a.ptr = nil
 	runtime.SetFinalizer(a, nil)
 }
 func (a *WindowAttributes) valid() bool { return a != nil && a.ptr != nil }
 func (a *WindowAttributes) WithDecorations(v bool) *WindowAttributes {
 	if a.valid() {
-		native.WindowAttributesWithDecorations(a.ptr, v)
+		windowAttributesWithDecorationsNative(a.ptr, v)
 	}
 	return a
 }
@@ -291,7 +300,7 @@ func (a *WindowAttributes) WithTitle(title string) *WindowAttributes {
 	if a.valid() {
 		box := BoxerStringFromByteString([]byte(title))
 		if box != nil {
-			native.WindowAttributesWithTitle(a.ptr, box.ptr)
+			windowAttributesWithTitleNative(a.ptr, box.ptr)
 			box.Drop()
 		}
 	}
@@ -299,43 +308,43 @@ func (a *WindowAttributes) WithTitle(title string) *WindowAttributes {
 }
 func (a *WindowAttributes) WithTransparency(v bool) *WindowAttributes {
 	if a.valid() {
-		native.WindowAttributesWithTransparency(a.ptr, v)
+		windowAttributesWithTransparencyNative(a.ptr, v)
 	}
 	return a
 }
 func (a *WindowAttributes) WithResizable(v bool) *WindowAttributes {
 	if a.valid() {
-		native.WindowAttributesWithResizable(a.ptr, v)
+		windowAttributesWithResizableNative(a.ptr, v)
 	}
 	return a
 }
 func (a *WindowAttributes) WithDimensions(width, height float64) *WindowAttributes {
 	if a.valid() {
-		native.WindowAttributesWithDimensionsFloat64(a.ptr, width, height)
+		windowAttributesWithDimensionsNative(a.ptr, width, height)
 	}
 	return a
 }
 func (a *WindowAttributes) WithMaximized(v bool) *WindowAttributes {
 	if a.valid() {
-		native.WindowAttributesWithMaximized(a.ptr, v)
+		windowAttributesWithMaximizedNative(a.ptr, v)
 	}
 	return a
 }
 func (a *WindowAttributes) WithVisibility(v bool) *WindowAttributes {
 	if a.valid() {
-		native.WindowAttributesWithVisibility(a.ptr, v)
+		windowAttributesWithVisibilityNative(a.ptr, v)
 	}
 	return a
 }
 func (a *WindowAttributes) WithAlwaysOnTop(v bool) *WindowAttributes {
 	if a.valid() {
-		native.WindowAttributesWithAlwaysOnTop(a.ptr, v)
+		windowAttributesWithAlwaysOnTopNative(a.ptr, v)
 	}
 	return a
 }
 func (a *WindowAttributes) WithFullSize(v bool) *WindowAttributes {
 	if a.valid() {
-		native.WindowAttributesWithFullSize(a.ptr, v)
+		windowAttributesWithFullSizeNative(a.ptr, v)
 	}
 	return a
 }
@@ -346,7 +355,7 @@ func (e *EventLoop) CreateWindow(a *WindowAttributes) *Window {
 	if e == nil || e.ptr == nil || !a.valid() {
 		return nil
 	}
-	w := &Window{ptr: native.CreateWindow(e.ptr, a.ptr)}
+	w := &Window{ptr: createWindowNative(e.ptr, a.ptr)}
 	// libwinit consumes WindowAttributes during window creation.
 	a.ptr = nil
 	runtime.SetFinalizer(a, nil)
@@ -359,7 +368,7 @@ func (w *Window) Close() {
 	if w == nil || w.ptr == nil {
 		return
 	}
-	native.WindowDrop(w.ptr)
+	windowDropNative(w.ptr)
 	w.ptr = nil
 	runtime.SetFinalizer(w, nil)
 }
@@ -377,7 +386,7 @@ func (w *Window) ScaleFactor() float64 {
 }
 func (w *Window) SetSize(width, height uint32) {
 	if w.valid() {
-		native.WindowSetInnerSize(w.ptr, width, height)
+		windowSetInnerSizeNative(w.ptr, width, height)
 	}
 }
 func (w *Window) SetPosition(x, y int32) {
@@ -396,18 +405,18 @@ func (w *Window) IsMaximized() bool {
 	if !w.valid() {
 		return false
 	}
-	return native.WindowIsMaximized(w.ptr)
+	return windowIsMaximizedNative(w.ptr)
 }
 func (w *Window) Focus() {
 	if w.valid() {
-		native.WindowFocusWindow(w.ptr)
+	windowFocusWindowNative(w.ptr)
 	}
 }
 
 // SetIMEAllowed enables or disables IME composition for the window.
 func (w *Window) SetIMEAllowed(allowed bool) {
 	if w.valid() {
-		native.WindowSetIMEAllowed(w.ptr, allowed)
+	windowSetIMEAllowedNative(w.ptr, allowed)
 	}
 }
 func (w *Window) HWND() unsafe.Pointer {

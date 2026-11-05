@@ -2,11 +2,15 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/kanryu/go-winit/winit"
 )
 
 func main() {
+	if os.Getenv("WINIT_UNIX_BACKEND") != "wayland" {
+		_ = os.Setenv("WINIT_UNIX_BACKEND", "x11")
+	}
 	eventLoop := winit.NewEventLoop()
 	if eventLoop == nil {
 		log.Fatal("winit: failed to create event loop")
@@ -27,6 +31,7 @@ func main() {
 		log.Fatal("winit: failed to create window")
 	}
 	defer window.Close()
+	window.SetSize(600, 400)
 	window.SetIMEAllowed(true)
 	window.Focus()
 	maximized := window.IsMaximized()
